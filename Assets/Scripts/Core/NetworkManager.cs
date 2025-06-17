@@ -11,12 +11,23 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     [SerializeField] private Transform _spawnPoint;
     [SerializeField] private GameObject _ConnectingScreen;
 
+    private string _currentname;
+
     public FormDatabase FormDatabase;
 
     private void Start()
     {
-        Debug.Log("Connecting...");
         Screen.SetResolution(800, 600, false);
+    }
+
+    public void ChangeName(string name)
+    {
+        _currentname = name;
+    }
+
+    public void ConnectToServer()
+    {
+        Debug.Log("Connecting...");
         PhotonNetwork.ConnectUsingSettings();
     }
 
@@ -49,6 +60,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         Vector3 spawnPosition = new Vector2(Random.Range(-5, 5), Random.Range(-5, 5));
         GameObject playerPrefab = PhotonNetwork.Instantiate(_player.name, spawnPosition, Quaternion.identity);
+        PhotonNetwork.LocalPlayer.NickName = _currentname;
         Player player = playerPrefab.GetComponent<Player>();
 
         if (player.photonView.IsMine)

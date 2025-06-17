@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using TMPro;
+using Photon.Pun.UtilityScripts;
 
 public class Player : MonoBehaviourPunCallbacks
 {
@@ -87,6 +88,7 @@ public class Player : MonoBehaviourPunCallbacks
 
         if(Beats(_currentFormIndex, otherPlayer._currentFormIndex))
         {
+            PhotonNetwork.LocalPlayer.AddScore(10);
             otherPlayer.photonView.RPC(nameof(MutateToForm), RpcTarget.AllBuffered, _currentFormIndex);
         }
     }
