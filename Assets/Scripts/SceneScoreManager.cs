@@ -11,7 +11,7 @@ public class SceneScoreManager : MonoBehaviourPunCallbacks
     [SerializeField] private Transform _leaderboardHolder;
     [SerializeField] private GameObject _playerItemPrefab;
     [SerializeField] private TextMeshProUGUI _scoreText;
-    private int _currentScore = 0;  // to track changes
+    private int _currentScore = 0;
 
     private void Start()
     {

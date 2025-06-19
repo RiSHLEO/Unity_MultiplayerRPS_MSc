@@ -2,27 +2,38 @@ using UnityEngine;
 using Photon.Pun;
 using TMPro;
 using Photon.Pun.UtilityScripts;
+using System.Collections;
 
 public class Player : MonoBehaviourPunCallbacks
 {
-    [Header("Forms")]
+    [Header("Form Data")]
     public FormData CurrentForm { get; private set; }
     private int _currentFormIndex;
-    private PlayerInputSet _input;
+    private FormDatabase _formDatabase;
+    [Header("State Machine")]
     private PlayerStateMachine _stateMachine;
-    public Rigidbody2D rb {  get; private set; }
     public PlayerIdleState IdleState {  get; private set; }
     public PlayerMoveState MoveState {  get; private set; }
+    [Header("Movement")]
+    private PlayerInputSet _input;
+    public Rigidbody2D rb {  get; private set; }
     public Vector2 MoveInput { get; private set; }
     public float MoveSpeed {  get; private set; }
 
-    private FormDatabase _formDatabase;
+    private XPManager _xpManager;
+    private SpriteRenderer _spriteRenderer;
+    [SerializeField] private float _cooldown = 4f;
+    private bool _mutationReady = true;
 
     private void Awake()
     {
         Debug.developerConsoleVisible = true;
 
+        _xpManager = XPManager.Instance;
+
         rb = GetComponent<Rigidbody2D>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+
         _formDatabase = FindFirstObjectByType<NetworkManager>().FormDatabase;
         _input = new PlayerInputSet();
         _stateMachine = new PlayerStateMachine();
@@ -55,7 +66,10 @@ public class Player : MonoBehaviourPunCallbacks
     private void Update()
     {
         if (photonView.IsMine)
+        {
             _stateMachine.UpdateActiveState();
+            OnPressMutate();
+        }
     }
 
     public void SetVelocity(float xVelocity, float yVelocity)
@@ -76,7 +90,7 @@ public class Player : MonoBehaviourPunCallbacks
         CurrentForm = form;
         _currentFormIndex = formIndex;
         MoveSpeed = CurrentForm.MoveSpeed;
-        GetComponent<SpriteRenderer>().color = CurrentForm.FormColor;
+        _spriteRenderer.color = CurrentForm.FormColor;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -89,7 +103,9 @@ public class Player : MonoBehaviourPunCallbacks
         if(Beats(_currentFormIndex, otherPlayer._currentFormIndex))
         {
             PhotonNetwork.LocalPlayer.AddScore(10);
+            _xpManager.AddEnergy(20);
             otherPlayer.photonView.RPC(nameof(MutateToForm), RpcTarget.AllBuffered, _currentFormIndex);
+            otherPlayer.photonView.RPC(nameof(LoseEnergy), otherPlayer.photonView.Owner, 10);
         }
     }
 
@@ -104,10 +120,45 @@ public class Player : MonoBehaviourPunCallbacks
             || (myIndex == 1 && theirIndex == 0);
     }
 
+    private void OnPressMutate()
+    {
+        if(_xpManager.currentEnergy == 0 || _mutationReady == false) return;
+
+        int formIndex = -1;
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            formIndex = 0;
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+            formIndex = 1;
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+            formIndex = 2;
+
+        if (formIndex != -1)
+        {
+            _xpManager.SpendEnergy(10);
+            photonView.RPC(nameof(MutateToForm), RpcTarget.AllBuffered, formIndex);
+            StartCoroutine(AbilityCooldownRoutine(_cooldown));
+        }
+    }
+
     [PunRPC]
     private void MutateToForm(int currentFormIndex)
     {
+        if (_currentFormIndex == currentFormIndex) return;
         FormData form = _formDatabase.allForms[currentFormIndex];
         ApplyForm(form, currentFormIndex);
+    }
+
+    [PunRPC]
+    private void LoseEnergy(int amount)
+    {
+        _xpManager.SpendEnergy(amount);
+    }
+
+    IEnumerator AbilityCooldownRoutine(float cooldown)
+    {
+        _mutationReady = false;
+        yield return new WaitForSeconds(cooldown);
+        _mutationReady = true;
     }
 }
