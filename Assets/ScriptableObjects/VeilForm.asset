@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FormName: Veil
   MoveSpeed: 10
-  FormColor: {r: 0, g: 0.09630537, b: 1, a: 1}
+  AnimatorController: {fileID: 9100000, guid: 00c1838558d618b4489b31ddca4fca1e, type: 2}

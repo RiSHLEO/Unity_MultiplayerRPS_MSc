@@ -12,6 +12,7 @@ public class Player : MonoBehaviourPunCallbacks
     private FormDatabase _formDatabase;
     [Header("State Machine")]
     private PlayerStateMachine _stateMachine;
+    public Animator Anim {  get; private set; }
     public PlayerIdleState IdleState {  get; private set; }
     public PlayerMoveState MoveState {  get; private set; }
     [Header("Movement")]
@@ -21,18 +22,19 @@ public class Player : MonoBehaviourPunCallbacks
     public float MoveSpeed {  get; private set; }
 
     private XPManager _xpManager;
-    private SpriteRenderer _spriteRenderer;
+    //private SpriteRenderer _spriteRenderer;
     [SerializeField] private float _cooldown = 4f;
     private bool _mutationReady = true;
+    private bool _facingRight = true;
 
     private void Awake()
     {
         Debug.developerConsoleVisible = true;
-
         _xpManager = XPManager.Instance;
 
+        Anim = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody2D>();
-        _spriteRenderer = GetComponent<SpriteRenderer>();
+        //_spriteRenderer = GetComponent<SpriteRenderer>();
 
         _formDatabase = FindFirstObjectByType<NetworkManager>().FormDatabase;
         _input = new PlayerInputSet();
@@ -75,7 +77,10 @@ public class Player : MonoBehaviourPunCallbacks
     public void SetVelocity(float xVelocity, float yVelocity)
     {
         if(photonView.IsMine)
+        {
             rb.linearVelocity = new Vector2(xVelocity, yVelocity);
+            HandleFlip(xVelocity);
+        }
     }
 
     [PunRPC]
@@ -90,7 +95,8 @@ public class Player : MonoBehaviourPunCallbacks
         CurrentForm = form;
         _currentFormIndex = formIndex;
         MoveSpeed = CurrentForm.MoveSpeed;
-        _spriteRenderer.color = CurrentForm.FormColor;
+        if (CurrentForm.AnimatorController != null)
+            Anim.runtimeAnimatorController = CurrentForm.AnimatorController;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -160,5 +166,19 @@ public class Player : MonoBehaviourPunCallbacks
         _mutationReady = false;
         yield return new WaitForSeconds(cooldown);
         _mutationReady = true;
+    }
+
+    private void HandleFlip(float xVelocity)
+    {
+        if (xVelocity > 0 && _facingRight == false)
+            Flip();
+        else if (xVelocity < 0 && _facingRight == true)
+            Flip();
+    }
+
+    private void Flip()
+    {
+        transform.Rotate(0, 180, 0);
+        _facingRight = !_facingRight;
     }
 }

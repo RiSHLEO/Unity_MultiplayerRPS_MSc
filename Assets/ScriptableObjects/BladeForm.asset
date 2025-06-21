@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FormName: Blade
   MoveSpeed: 12
-  FormColor: {r: 0.028539093, g: 0.6981132, b: 0.14803536, a: 1}
+  AnimatorController: {fileID: 9100000, guid: 50028c8406364684d8079a81213729ee, type: 2}

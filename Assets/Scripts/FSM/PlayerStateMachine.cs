@@ -21,4 +21,10 @@ public class PlayerStateMachine
     {
         currentState.Update();
     }
+
+    public void ReEnterCurrentState()
+    {
+        currentState.Enter();
+        currentState.Exit();
+    }
 }

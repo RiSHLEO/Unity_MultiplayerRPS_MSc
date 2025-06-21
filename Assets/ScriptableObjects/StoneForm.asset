@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FormName: Stone
   MoveSpeed: 6
-  FormColor: {r: 1, g: 0, b: 0, a: 1}
+  AnimatorController: {fileID: 9100000, guid: 13b2e19ba4576ec4e9f46e5484cdf0c6, type: 2}
