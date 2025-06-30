@@ -15,8 +15,9 @@ public class Player : MonoBehaviourPunCallbacks
     public Animator Anim {  get; private set; }
     public PlayerIdleState IdleState {  get; private set; }
     public PlayerMoveState MoveState {  get; private set; }
+    public PlayerAbilityState AbilityState {  get; private set; }
     [Header("Movement")]
-    private PlayerInputSet _input;
+    public PlayerInputSet _input {  get; private set; } 
     public Rigidbody2D rb {  get; private set; }
     public Vector2 MoveInput { get; private set; }
     public float MoveSpeed {  get; private set; }
@@ -26,6 +27,9 @@ public class Player : MonoBehaviourPunCallbacks
     [SerializeField] private float _cooldown = 4f;
     private bool _mutationReady = true;
     private bool _facingRight = true;
+    private AbilitySO _currentAbility;
+    private float _activeTime;
+
 
     private void Awake()
     {
@@ -42,6 +46,7 @@ public class Player : MonoBehaviourPunCallbacks
 
         IdleState = new PlayerIdleState(this, _stateMachine, "idle");
         MoveState = new PlayerMoveState(this, _stateMachine, "move");
+        AbilityState = new PlayerAbilityState(this, _stateMachine, "ability");
     }
 
     private void OnEnable()
@@ -71,6 +76,7 @@ public class Player : MonoBehaviourPunCallbacks
         {
             _stateMachine.UpdateActiveState();
             OnPressMutate();
+            //HandleAbilityInput();
         }
     }
 
@@ -97,6 +103,8 @@ public class Player : MonoBehaviourPunCallbacks
         MoveSpeed = CurrentForm.MoveSpeed;
         if (CurrentForm.AnimatorController != null)
             Anim.runtimeAnimatorController = CurrentForm.AnimatorController;
+
+        _currentAbility = form.Ability;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -131,7 +139,6 @@ public class Player : MonoBehaviourPunCallbacks
         if(_xpManager.currentEnergy == 0 || _mutationReady == false) return;
 
         int formIndex = -1;
-
         if (Input.GetKeyDown(KeyCode.Alpha1))
             formIndex = 0;
         else if (Input.GetKeyDown(KeyCode.Alpha2))
@@ -181,4 +188,12 @@ public class Player : MonoBehaviourPunCallbacks
         transform.Rotate(0, 180, 0);
         _facingRight = !_facingRight;
     }
+
+    //private void HandleAbilityInput()
+    //{
+    //    if (Input.GetKeyDown(KeyCode.Space) && _currentAbility != null)
+    //    {
+    //        _stateMachine.ChangeState(AbilityState);
+    //    }
+    //}
 }

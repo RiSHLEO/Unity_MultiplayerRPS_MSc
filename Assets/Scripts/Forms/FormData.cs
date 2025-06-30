@@ -6,5 +6,5 @@ public class FormData : ScriptableObject
     public string FormName;
     public float MoveSpeed;
     public RuntimeAnimatorController AnimatorController;
-    //public Color FormColor;
+    public AbilitySO Ability;
 }

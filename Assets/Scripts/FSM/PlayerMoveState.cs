@@ -17,7 +17,8 @@ public class PlayerMoveState : PlayerState
         if(player.MoveInput.x == 0 && player.MoveInput.y == 0)
             stateMachine.ChangeState(player.IdleState);
 
-        player.SetVelocity(player.MoveInput.x * player.MoveSpeed, player.MoveInput.y * player.MoveSpeed);
+        Vector2 movement = player.MoveInput.normalized;
+        player.SetVelocity(movement.x * player.MoveSpeed, movement.y * player.MoveSpeed);
     }
 
     public override void Exit()

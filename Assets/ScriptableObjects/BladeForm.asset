@@ -15,3 +15,4 @@ MonoBehaviour:
   FormName: Blade
   MoveSpeed: 12
   AnimatorController: {fileID: 9100000, guid: 50028c8406364684d8079a81213729ee, type: 2}
+  Ability: {fileID: 11400000, guid: f4ca416423522b04abf4f18ff483499a, type: 2}

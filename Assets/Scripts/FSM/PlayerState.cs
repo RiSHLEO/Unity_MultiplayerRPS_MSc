@@ -8,6 +8,8 @@ public abstract class PlayerState
 
     protected Animator anim;
     protected Rigidbody2D rb;
+    protected PlayerInputSet input;
+    protected float stateTimer;
 
     protected PlayerState(Player player, PlayerStateMachine stateMachine, string animBoolName)
     {
@@ -17,6 +19,7 @@ public abstract class PlayerState
 
         anim = player.Anim;
         rb = player.rb;
+        input = player._input;
     }
 
     public virtual void Enter()
@@ -26,7 +29,9 @@ public abstract class PlayerState
 
     public virtual void Update()
     {
-
+        stateTimer -= Time.deltaTime;
+        if (input.Player.Ability.WasPressedThisFrame())
+            stateMachine.ChangeState(player.AbilityState);
     }
 
     public virtual void Exit()
